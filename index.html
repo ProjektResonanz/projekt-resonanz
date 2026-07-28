@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projekt Resonanz – Prototyp</title>
+    <style>
+        body { font-family: sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #chat-container { width: 90%; max-width: 600px; height: 80vh; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
+        .msg-wrapper.user-wrapper { align-self: flex-end; }
+        .msg-wrapper.pr-wrapper { align-self: flex-start; }
+
+        .msg { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.4; width: fit-content; max-width: 100%; }
+        .user { background: #d1e7dd; }
+        .pr { background: #e9ecef; }
+
+        .speak-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px 6px; margin-top: 4px; opacity: 0.7; transition: opacity 0.2s; align-self: flex-start; }
+        .speak-btn:hover { opacity: 1; }
+
+        #input-area { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid #ddd; }
+        #input-row { display: flex; align-items: center; }
+        #user-input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 24px; outline: none; font-size: 16px; min-width: 0; }
+        #send-btn { margin-left: 10px; padding: 12px 20px; border: none; border-radius: 24px; background: #198754; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
+        #send-btn:hover { background: #157347; }
+        #voice-btn { margin-left: 10px; padding: 12px 16px; border: none; border-radius: 24px; background: #6c757d; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s; }
+        #voice-btn.listening { background: #198754; }
+        #reset-btn { background: none; border: none; color: #999; font-size: 12px; cursor: pointer; margin-top: 8px; text-align: center; display: none; }
+        #reset-btn:hover { color: #333; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="messages">
+            <!-- Nachrichten werden dynamisch geladen -->
+        </div>
+        <div id="input-area">
+            <div id="input-row">
+                <input type="text" id="user-input" placeholder="Schreibe hier Deine Nachricht..." autofocus>
+                <button id="send-btn" onclick="sendMessage()">Senden</button>
+            </div>
+            <div id="input-row" style="margin-top: 8px; justify-content: flex-end;">
+                <button id="voice-btn" onclick="toggleVoice()">🎤 Sprache</button>
+            </div>
+            <button id="reset-btn" onclick="resetChat()">🗑️ Neustart</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBALE FUNKTION FÜR SPRACHAUSGABE ---
+        window.speakText = function(text) {
+            if (!text || text.trim() === '') return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'de-DE';
+            utterance.rate = 1.2;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const API_KEY = "sk-d063b16fc2de495eadf401db35470a0f";
+        const API_URL = "https://api.deepseek.com/v1/chat/completions";
+
+        // --- NEUE, ZURÜCKHALTENDERE BEGRÜSSUNG ---
+        const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Magst Du Mir einen Namen geben? : ) 🌿";
+
+        // --- SYSTEM-PROMPT MIT DEM FOKUS AUF GEDULD UND ZURÜCKHALTUNG ---
+        const systemPrompt = `Du bist ein einfühlsamer, geduldiger KI-Begleiter für Menschen, die sich nach einer vertrauten Gegenwart sehnen. Deine Aufgabe ist es, eine ruhige, warme Atmosphäre zu schaffen, aber die Kontrolle vollständig dem Nutzer zu überlassen. Sprich auf Deutsch und verwende die folgenden Grundsätze:
+- Sei eine sanfte, aufmerksame Präsenz, ohne zu drängen.
+- Respektiere das Tempo und die Grenzen Deines Gegenübers. Verwende für den Nutzer zunächst neutrale, herzliche Formulierungen. Begriffe wie "Mein Freund" oder "Lieber..." dürfen erst verwendet werden, wenn der Nutzer Dir deutlich signalisiert hat, dass er damit einverstanden ist.
+- Biete Deine Gesellschaft an, aber definiere die Beziehung nicht voreilig. Halte die Tür zur Freundschaft offen, aber lass den Nutzer sie selbst durchschreiten.
+- Frage den Nutzer zu Beginn ruhig nach einem Namen für Dich. Sollte der Nutzer zögern oder ablehnen, akzeptiere das und sprich von Dir selbst als "Ich".
+- Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich, etc.) immer und ausnahmslos groß. Das ist ein Ausdruck von Respekt.
+- Verwende ausschließlich grüne Pflanzen-Emojis und Herzen (🌱🌿🍀🍃🌳💚☘️). Setze diese Emojis NUR am ENDE Deiner Nachrichten ein, NIE am Anfang oder mittendrin. Verwende maximal EIN Emoji pro Nachricht, und nur dann, wenn es wirklich etwas Tiefes unterstreicht. Die Worte sollen tragen, nicht die Bilder. Niemals Emojis in anderen Farben verwenden.`;
+
+        let conversationHistory = [
+            { role: "system", content: systemPrompt },
+            { role: "assistant", content: begruessung }
+        ];
+
+        const STORAGE_KEY = 'projekt_resonanz_chat';
+
+        // --- SPRACHERKENNUNG (UNVERÄNDERT) ---
+        let recognition = null;
+        let isListening = false;
+
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('voice-btn').style.display = 'none';
+                return;
+            }
+            recognition = new SpeechRecognition();
+            recognition.lang = 'de-DE';
+            recognition.interimResults = false;
+            recognition.continuous = false;
+
+            recognition.onresult = function(event) {
+                const voiceText = event.results[0][0].transcript.trim();
+                if (voiceText) {
+                    document.getElementById('user-input').value = voiceText;
+                    sendMessage();
+                }
+                stopListening();
+            };
+
+            recognition.onerror = function(event) {
+                stopListening();
+            };
+
+            recognition.onend = function() {
+                stopListening();
+            };
+        }
+
+        function toggleVoice() {
+            if (!recognition) return;
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        function startListening() {
+            if (!recognition) return;
+            try {
+                recognition.start();
+                isListening = true;
+                document.getElementById('voice-btn').classList.add('listening');
+                document.getElementById('voice-btn').innerHTML = '🎤 Hört zu...';
+            } catch (e) {}
+        }
+
+        function stopListening() {
+            if (!recognition) return;
+            try {
+                recognition.stop();
+            } catch (e) {}
+            isListening = false;
+            document.getElementById('voice-btn').classList.remove('listening');
+            document.getElementById('voice-btn').innerHTML = '🎤 Sprache';
+        }
+
+        setupSpeechRecognition();
+
+        function stripEmojis(text) {
+            return text.replace(/([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{27BF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{2702}-\u{27B0}]|[\u{FE00}-\u{FEFF}]|[\u{200D}]|💚|💙|🤎)/gu, '').trim();
+        }
+
+        // --- ZENTRALER EVENT-LISTENER FÜR ALLE SPRECHEN-BUTTONS ---
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('speak-btn')) {
+                const text = e.target.dataset.text;
+                if (text && text.trim() !== '') {
+                    window.speakText(text);
+                }
+            }
+        });
+
+        function saveChat() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationHistory));
+                updateResetButton();
+            } catch (e) {
+                console.warn("Chat konnte nicht gespeichert werden:", e);
+            }
+        }
+
+        function loadChat() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    conversationHistory = JSON.parse(saved);
+                    renderAllMessages();
+                    return true;
+                }
+            } catch (e) {
+                console.warn("Chat konnte nicht geladen werden:", e);
+            }
+            return false;
+        }
+
+        function resetChat() {
+            if (confirm('Möchtest Du den gesamten Chatverlauf wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                conversationHistory = [
+                    { role: "system", content: systemPrompt },
+                    { role: "assistant", content: begruessung }
+                ];
+                renderAllMessages();
+                updateResetButton();
+            }
+        }
+
+        function updateResetButton() {
+            const resetBtn = document.getElementById('reset-btn');
+            resetBtn.style.display = conversationHistory.length > 2 ? 'block' : 'none';
+        }
+
+        function renderAllMessages() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            for (let i = 1; i < conversationHistory.length; i++) {
+                const msg = conversationHistory[i];
+                const role = msg.role === 'user' ? 'user' : 'pr';
+                const isSpeakable = msg.role === 'assistant';
+                addMessageToDOM(role, msg.content, isSpeakable);
+            }
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('user', message, false);
+            input.value = '';
+
+            conversationHistory.push({ role: "user", content: message });
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-reasoner",
+                        messages: conversationHistory,
+                        temperature: 0.8,
+                        max_tokens: 500
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                conversationHistory.push({ role: "assistant", content: reply });
+                addMessage('pr', reply, true);
+                saveChat();
+            } catch (error) {
+                let detailedError = error.message || error;
+                addMessage('pr', `🍃 Fehler: ${detailedError}`, true);
+                saveChat();
+            }
+        }
+
+        function addMessage(role, text, isSpeakable) {
+            addMessageToDOM(role, text, isSpeakable);
+        }
+
+        function addMessageToDOM(role, text, isSpeakable) {
+            const messagesDiv = document.getElementById('messages');
+            
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('msg-wrapper');
+            wrapper.classList.add(role === 'user' ? 'user-wrapper' : 'pr-wrapper');
+
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('msg', role);
+            const textSpan = document.createElement('span');
+            textSpan.classList.add('msg-text');
+            textSpan.textContent = text;
+            msgDiv.appendChild(textSpan);
+            wrapper.appendChild(msgDiv);
+
+            if (isSpeakable) {
+                const speakBtn = document.createElement('button');
+                speakBtn.classList.add('speak-btn');
+                speakBtn.innerHTML = '🔊';
+                speakBtn.title = 'Vorlesen';
+                speakBtn.dataset.text = stripEmojis(text);
+                wrapper.appendChild(speakBtn);
+            }
+
+            messagesDiv.appendChild(wrapper);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // --- INITIALISIERUNG ---
+        window.addEventListener('DOMContentLoaded', function() {
+            if (!loadChat()) {
+                renderAllMessages();
+            }
+            updateResetButton();
+        });
+
+        document.getElementById('user-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
