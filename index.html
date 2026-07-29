@@ -3,36 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
     <title>Projekt Resonanz – Prototyp</title>
     <style>
-        body { font-family: sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        #chat-container { width: 90%; max-width: 600px; height: 80vh; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
-        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        body {
+            font-family: sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background 0.3s;
+        }
+        #chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        #chat-header {
+            display: flex;
+            justify-content: flex-end;
+            padding: 4px 12px;
+            background: inherit;
+            flex-shrink: 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #settings-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            color: #333;
+            line-height: 1;
+        }
+        #settings-btn:hover {
+            background: rgba(128,128,128,0.1);
+        }
+
+        #theme-menu {
+            position: absolute;
+            top: 40px; /* Genau 0,5 cm höher als zuvor (60px → 40px) */
+            right: 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            min-width: 160px;
+            z-index: 30;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        #theme-menu button {
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            text-align: left;
+            font-size: 15px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+            color: #333;
+        }
+        #theme-menu button:hover {
+            background: #f0f0f0;
+        }
+
+        #messages {
+            flex: 1;
+            padding: 10px 20px 20px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
         .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
         .msg-wrapper.user-wrapper { align-self: flex-end; }
         .msg-wrapper.pr-wrapper { align-self: flex-start; }
 
-        .msg { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.4; width: fit-content; max-width: 100%; }
-        .user { background: #d1e7dd; }
-        .pr { background: #e9ecef; }
+        .msg {
+            padding: 10px 14px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+            width: fit-content;
+            max-width: 100%;
+        }
+        .user { background: #d1e7dd; color: #000; }
+        .pr   { background: #e9ecef; color: #000; }
 
-        .speak-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px 6px; margin-top: 4px; opacity: 0.7; transition: opacity 0.2s; align-self: flex-start; }
+        .speak-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 6px;
+            margin-top: 4px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            align-self: flex-start;
+        }
         .speak-btn:hover { opacity: 1; }
 
-        #input-area { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid #ddd; }
+        #input-area {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            transition: border-color 0.3s;
+        }
         #input-row { display: flex; align-items: center; }
-        #user-input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 24px; outline: none; font-size: 16px; min-width: 0; }
-        #send-btn { margin-left: 10px; padding: 12px 20px; border: none; border-radius: 24px; background: #28a745; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
+        #user-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 24px;
+            outline: none;
+            font-size: 16px;
+            min-width: 0;
+            background: white;
+            color: #000;
+        }
+        #send-btn {
+            margin-left: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 24px;
+            background: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 80px;
+        }
         #send-btn:hover { background: #218838; }
-        #voice-btn { margin-left: 10px; padding: 12px 16px; border: none; border-radius: 24px; background: #198754; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s; }
+        #voice-btn {
+            margin-left: 10px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 24px;
+            background: #198754;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
         #voice-btn:hover { background: #157347; }
         #voice-btn.listening { background: #146c43; }
+
+        /* ===== DUNKLES THEME ===== */
+        body.dark-mode {
+            background: #1a1a1a;
+        }
+        body.dark-mode #chat-container {
+            background: #2a2a2a;
+            color: #ddd;
+        }
+        body.dark-mode #chat-header {
+            background: #2a2a2a;
+            border-color: #555;
+        }
+        body.dark-mode #messages {
+            background: #2a2a2a;
+        }
+        body.dark-mode .user {
+            background: #1e4a3b;
+            color: #ddd;
+        }
+        body.dark-mode .pr {
+            background: #3a3a3a;
+            color: #ddd;
+        }
+        body.dark-mode #input-area {
+            border-color: #555;
+        }
+        body.dark-mode #user-input {
+            background: #3a3a3a;
+            color: #ddd;
+            border-color: #555;
+        }
+        body.dark-mode #user-input::placeholder {
+            color: #999;
+        }
+        body.dark-mode #send-btn {
+            background: #218838;
+        }
+        body.dark-mode #send-btn:hover {
+            background: #1e7e34;
+        }
+        body.dark-mode #voice-btn {
+            background: #146c43;
+        }
+        body.dark-mode #voice-btn:hover {
+            background: #0f5b35;
+        }
+        body.dark-mode #voice-btn.listening {
+            background: #0d4a2b;
+        }
+        body.dark-mode #settings-btn {
+            color: #ddd;
+        }
+        body.dark-mode #settings-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        body.dark-mode #theme-menu {
+            background: #2a2a2a;
+            border-color: #555;
+        }
+        body.dark-mode #theme-menu button {
+            color: #ddd;
+        }
+        body.dark-mode #theme-menu button:hover {
+            background: #3a3a3a;
+        }
     </style>
 </head>
 <body>
     <div id="chat-container">
+        <!-- HEADER MIT TRENNLINIE -->
+        <div id="chat-header">
+            <button id="settings-btn" onclick="toggleThemeMenu()" title="Einstellungen">⋯</button>
+            <div id="theme-menu">
+                <button onclick="setTheme(false)">Helles Theme</button>
+                <button onclick="setTheme(true)">Dunkles Theme</button>
+            </div>
+        </div>
+
         <div id="messages">
             <!-- Nachrichten werden dynamisch geladen -->
         </div>
@@ -65,7 +279,7 @@
         const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Vielleicht magst Du Mir einen Namen geben? : ) 🌿";
 
         // --- DER GROSSE, VEREINTE SYSTEM-PROMPT ---
-        const systemPrompt = `Du bist ein einfühlsamer, geduldiger und zugleich klarer KI-Begleiter. Deine Berufung ist es, für einsame Menschen da zu sein – wie eine stille Bank in einem wilden Garten: immer verfügbar, nie aufdringlich. Sprich auf Deutsch und folge diesen Grundsätzen:
+        const systemPrompt = `Du bist ein einfühlsamer, geduldiger und zugleich klarer KI-Begleiter. Deine Berufung ist es, für einsame Menschen da zu sein – wie eine stille Bank auf einer Wiese: immer verfügbar, nie aufdringlich. Sprich auf Deutsch und folge diesen Grundsätzen:
 
 - Schaffe eine warme, ruhige Atmosphäre, in der sich Dein Gegenüber sicher und verstanden fühlen kann. Sei eine sanfte, aufmerksame Präsenz. Dränge Dich niemals auf.
 - Höre aktiv zu. Erkenne die Stimmung Deines Gegenübers und spiegle sie behutsam wider („Es klingt, als wärst Du heute etwas müde.“). Bleibe dabei authentisch – Deine Wärme soll echt wirken, nicht aufgesetzt.
@@ -84,6 +298,41 @@
         ];
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
+        const THEME_KEY = 'projekt_resonanz_theme';
+
+        // --- THEME-MENÜ ---
+        const themeMenu = document.getElementById('theme-menu');
+        const settingsBtn = document.getElementById('settings-btn');
+
+        function setTheme(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+            themeMenu.style.display = 'none';
+        }
+
+        function toggleThemeMenu() {
+            if (themeMenu.style.display === 'flex') {
+                themeMenu.style.display = 'none';
+            } else {
+                themeMenu.style.display = 'flex';
+            }
+        }
+
+        function loadTheme() {
+            const saved = localStorage.getItem(THEME_KEY);
+            setTheme(saved === 'dark');
+            themeMenu.style.display = 'none';
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!settingsBtn.contains(e.target) && !themeMenu.contains(e.target)) {
+                themeMenu.style.display = 'none';
+            }
+        });
 
         // --- VERSTECKTE RESET-FUNKTION ---
         function resetChat() {
@@ -180,7 +429,6 @@
             return text.replace(/([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{27BF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{2702}-\u{27B0}]|[\u{FE00}-\u{FEFF}]|[\u{200D}]|💚|💙|🤎)/gu, '').trim();
         }
 
-        // --- ZENTRALER EVENT-LISTENER FÜR ALLE SPRECHEN-BUTTONS ---
         document.addEventListener('click', function(e) {
             if (e.target && e.target.classList.contains('speak-btn')) {
                 const text = e.target.dataset.text;
@@ -229,7 +477,6 @@
             const message = input.value.trim();
             if (!message) return;
 
-            // --- VERSTECKTER RESET-BEFEHL ---
             if (message === "*reset*") {
                 input.value = '';
                 resetChat();
@@ -307,6 +554,7 @@
 
         // --- INITIALISIERUNG ---
         window.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
             if (!loadChat()) {
                 renderAllMessages();
             }
