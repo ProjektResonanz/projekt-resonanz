@@ -24,12 +24,11 @@
         #input-area { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid #ddd; }
         #input-row { display: flex; align-items: center; }
         #user-input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 24px; outline: none; font-size: 16px; min-width: 0; }
-        #send-btn { margin-left: 10px; padding: 12px 20px; border: none; border-radius: 24px; background: #198754; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
-        #send-btn:hover { background: #157347; }
-        #voice-btn { margin-left: 10px; padding: 12px 16px; border: none; border-radius: 24px; background: #6c757d; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s; }
-        #voice-btn.listening { background: #198754; }
-        #reset-btn { background: none; border: none; color: #999; font-size: 12px; cursor: pointer; margin-top: 8px; text-align: center; display: none; }
-        #reset-btn:hover { color: #333; }
+        #send-btn { margin-left: 10px; padding: 12px 20px; border: none; border-radius: 24px; background: #28a745; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
+        #send-btn:hover { background: #218838; }
+        #voice-btn { margin-left: 10px; padding: 12px 16px; border: none; border-radius: 24px; background: #198754; color: white; font-size: 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s; }
+        #voice-btn:hover { background: #157347; }
+        #voice-btn.listening { background: #146c43; }
     </style>
 </head>
 <body>
@@ -45,7 +44,6 @@
             <div id="input-row" style="margin-top: 8px; justify-content: flex-end;">
                 <button id="voice-btn" onclick="toggleVoice()">🎤 Sprache</button>
             </div>
-            <button id="reset-btn" onclick="resetChat()">🗑️ Neustart</button>
         </div>
     </div>
 
@@ -179,7 +177,6 @@
         function saveChat() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationHistory));
-                updateResetButton();
             } catch (e) {
                 console.warn("Chat konnte nicht gespeichert werden:", e);
             }
@@ -197,23 +194,6 @@
                 console.warn("Chat konnte nicht geladen werden:", e);
             }
             return false;
-        }
-
-        function resetChat() {
-            if (confirm('Möchtest Du den gesamten Chatverlauf wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) {
-                localStorage.removeItem(STORAGE_KEY);
-                conversationHistory = [
-                    { role: "system", content: systemPrompt },
-                    { role: "assistant", content: begruessung }
-                ];
-                renderAllMessages();
-                updateResetButton();
-            }
-        }
-
-        function updateResetButton() {
-            const resetBtn = document.getElementById('reset-btn');
-            resetBtn.style.display = conversationHistory.length > 2 ? 'block' : 'none';
         }
 
         function renderAllMessages() {
@@ -307,7 +287,6 @@
             if (!loadChat()) {
                 renderAllMessages();
             }
-            updateResetButton();
         });
 
         document.getElementById('user-input').addEventListener('keydown', function(e) {
