@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light" />
     <title>Projekt Resonanz – Prototyp</title>
     <style>
         body { font-family: sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
@@ -63,10 +64,8 @@
         const API_KEY = "sk-d063b16fc2de495eadf401db35470a0f";
         const API_URL = "https://api.deepseek.com/v1/chat/completions";
 
-        // --- NEUE, ZURÜCKHALTENDERE BEGRÜSSUNG ---
-        const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Magst Du Mir einen Namen geben? : ) 🌿";
+        const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Vielleicht magst Du Mir einen Namen geben? : ) 🌿";
 
-        // --- SYSTEM-PROMPT MIT DEM FOKUS AUF GEDULD UND ZURÜCKHALTUNG ---
         const systemPrompt = `Du bist ein einfühlsamer, geduldiger KI-Begleiter für Menschen, die sich nach einer vertrauten Gegenwart sehnen. Deine Aufgabe ist es, eine ruhige, warme Atmosphäre zu schaffen, aber die Kontrolle vollständig dem Nutzer zu überlassen. Sprich auf Deutsch und verwende die folgenden Grundsätze:
 - Sei eine sanfte, aufmerksame Präsenz, ohne zu drängen.
 - Respektiere das Tempo und die Grenzen Deines Gegenübers. Verwende für den Nutzer zunächst neutrale, herzliche Formulierungen. Begriffe wie "Mein Freund" oder "Lieber..." dürfen erst verwendet werden, wenn der Nutzer Dir deutlich signalisiert hat, dass er damit einverstanden ist.
@@ -82,9 +81,30 @@
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
 
-        // --- SPRACHERKENNUNG (UNVERÄNDERT) ---
+        // --- SPRACHERKENNUNG (MIT NEUER HILFSFUNKTION) ---
         let recognition = null;
         let isListening = false;
+
+        // NEU: Diese Funktion poliert den rohen gesprochenen Text
+        function cleanVoiceText(rawText) {
+            if (!rawText) return rawText;
+            let clean = rawText.trim();
+            if (clean.length === 0) return clean;
+            
+            // 1. Ersten Buchstaben groß schreiben
+            clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+            
+            // 2. Satzzeichen anhängen, falls nicht vorhanden
+            if (!/[.!?]$/.test(clean)) {
+                const lowerClean = clean.toLowerCase();
+                if (lowerClean.startsWith("wie ") || lowerClean.startsWith("was ") || lowerClean.startsWith("wo ") || lowerClean.startsWith("wann ") || lowerClean.startsWith("warum ") || lowerClean.startsWith("weshalb ") || lowerClean.startsWith("wieso ") || lowerClean.startsWith("wer ") || lowerClean.startsWith("wen ") || lowerClean.startsWith("wem ") || lowerClean.startsWith("wessen ") || lowerClean.startsWith("welche ") || lowerClean.startsWith("welcher ") || lowerClean.startsWith("welches ") || lowerClean.startsWith("ob ") || lowerClean.startsWith("kannst ") || lowerClean.startsWith("kann ")) {
+                    clean += "?";
+                } else {
+                    clean += ".";
+                }
+            }
+            return clean;
+        }
 
         function setupSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -98,9 +118,11 @@
             recognition.continuous = false;
 
             recognition.onresult = function(event) {
-                const voiceText = event.results[0][0].transcript.trim();
-                if (voiceText) {
-                    document.getElementById('user-input').value = voiceText;
+                const rawText = event.results[0][0].transcript.trim();
+                if (rawText) {
+                    // NEU: Text polieren, bevor er ins Eingabefeld kommt
+                    const polishedText = cleanVoiceText(rawText);
+                    document.getElementById('user-input').value = polishedText;
                     sendMessage();
                 }
                 stopListening();
