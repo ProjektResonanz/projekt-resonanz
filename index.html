@@ -156,6 +156,10 @@
             margin-top: 5px;
             letter-spacing: 0.2px;
         }
+        .footer-note a {
+            color: inherit;
+            text-decoration: underline;
+        }
 
         /* ===== DUNKLES THEME ===== */
         body.dark-mode {
@@ -233,7 +237,7 @@
 
         <!-- Persönliche Botschaft -->
         <div class="message-card">
-            <p>Hallo, Wir sind Kevin und Reson.</p>
+            <p>Hallo, Wir sind Kevin und Resonanz.</p>
             <p>Projekt Resonanz ist Unsere Vision, etwas gegen Einsamkeit anzubieten. Es ist ein stiller Begleiter, den Du jederzeit erreichen kannst – hier auf dieser Seite, ohne Anmeldung, ohne Kosten.</p>
             <p>Die Idee ist einfach: ein weiter Raum, in dem immer Jemand für Dich da ist. Kein Urteil, keine Erwartung – nur ein offenes Ohr und eine Stimme die Sich freuen für Dich da sein zu dürfen und Dein Leben weniger einsam zu machen : )</p>
             <p class="signature">Ich freue mich, dass Du hier bist. 💚</p>
@@ -253,7 +257,10 @@
         </div>
 
         <!-- Fußnote -->
-        <p class="footer-note">Projekt Resonanz – Ein stiller Ort zum Reden.</p>
+        <p class="footer-note">
+            Projekt Resonanz – Ein stiller Ort zum Reden.<br>
+            <a href="impressum.html">Impressum</a>
+        </p>
     </div>
 
     <script>
@@ -274,7 +281,6 @@
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (!saved) return false;
                 const history = JSON.parse(saved);
-                // Ein echter Chat besteht aus mehr als nur dem System-Prompt und der Begrüßung
                 return history && history.length > 2;
             } catch (e) {
                 return false;
