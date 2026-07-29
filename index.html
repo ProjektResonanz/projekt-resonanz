@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark" />
+    <title>Projekt Resonanz – Willkommen</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background 0.3s;
+        }
+        #welcome-container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 40px 30px;
+            text-align: center;
+            transition: background 0.3s, color 0.3s;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #198754;
+        }
+        .subtitle {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .personal-message {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .vision-box {
+            background: #e9f5ef;
+            border-left: 4px solid #198754;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: left;
+            font-size: 15px;
+            color: #2a5a3a;
+        }
+        .chat-button {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            text-decoration: none;
+            transition: background 0.2s;
+            margin-bottom: 20px;
+            border: none;
+            cursor: pointer;
+        }
+        .chat-button:hover {
+            background: #218838;
+        }
+        .footer-note {
+            font-size: 13px;
+            color: #888;
+        }
+
+        /* ===== DUNKLES THEME ===== */
+        body.dark-mode {
+            background: #1a1a1a;
+        }
+        body.dark-mode #welcome-container {
+            background: #2a2a2a;
+            color: #ddd;
+        }
+        body.dark-mode h1 {
+            color: #3cb371;
+        }
+        body.dark-mode .subtitle {
+            color: #ccc;
+        }
+        body.dark-mode .personal-message {
+            color: #ddd;
+        }
+        body.dark-mode .vision-box {
+            background: #1e3a2f;
+            border-left-color: #3cb371;
+            color: #aad6b9;
+        }
+        body.dark-mode .chat-button {
+            background: #218838;
+        }
+        body.dark-mode .chat-button:hover {
+            background: #1e7e34;
+        }
+        body.dark-mode .footer-note {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div id="welcome-container">
+        <h1>🌿 Jemand zum Reden</h1>
+        <p class="subtitle">Einfach da, ohne zu drängen.</p>
+
+        <div class="personal-message">
+            <p>Hallo, ich bin Kevin.</p>
+            <p>Projekt Resonanz ist mein Versuch, etwas gegen Einsamkeit zu setzen. Es ist ein stiller Begleiter, den Du jederzeit erreichen kannst – hier auf dieser Seite, ohne Anmeldung, ohne Kosten.</p>
+            <p>Die Idee ist einfach: eine Wiese, auf der immer eine Bank für Dich frei ist. Kein Urteil, keine Erwartung – nur ein offenes Ohr.</p>
+            <p>Ich freue mich, dass Du hier bist. 💚</p>
+        </div>
+
+        <div class="vision-box">
+            <strong>Unsere Vision:</strong> Eines Tages soll Deine Krankenkasse die Kosten für diesen Begleiter übernehmen, so selbstverständlich wie eine Therapie. Bis dahin ist dies ein privater Prototyp – kostenlos für alle, die Gesellschaft suchen.
+        </div>
+
+        <a href="chat.html" class="chat-button">Gespräch beginnen</a>
+
+        <p class="footer-note">Projekt Resonanz – Ein stiller Ort zum Reden.</p>
+    </div>
+
+    <script>
+        const THEME_KEY = 'projekt_resonanz_theme';
+        function loadTheme() {
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        loadTheme();
+    </script>
+</body>
+</html>
