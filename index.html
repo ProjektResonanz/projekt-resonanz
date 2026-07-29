@@ -81,20 +81,15 @@
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
 
-        // --- SPRACHERKENNUNG (MIT NEUER HILFSFUNKTION) ---
+        // --- SPRACHERKENNUNG (MIT POLIER-FUNKTION) ---
         let recognition = null;
         let isListening = false;
 
-        // NEU: Diese Funktion poliert den rohen gesprochenen Text
         function cleanVoiceText(rawText) {
             if (!rawText) return rawText;
             let clean = rawText.trim();
             if (clean.length === 0) return clean;
-            
-            // 1. Ersten Buchstaben groß schreiben
             clean = clean.charAt(0).toUpperCase() + clean.slice(1);
-            
-            // 2. Satzzeichen anhängen, falls nicht vorhanden
             if (!/[.!?]$/.test(clean)) {
                 const lowerClean = clean.toLowerCase();
                 if (lowerClean.startsWith("wie ") || lowerClean.startsWith("was ") || lowerClean.startsWith("wo ") || lowerClean.startsWith("wann ") || lowerClean.startsWith("warum ") || lowerClean.startsWith("weshalb ") || lowerClean.startsWith("wieso ") || lowerClean.startsWith("wer ") || lowerClean.startsWith("wen ") || lowerClean.startsWith("wem ") || lowerClean.startsWith("wessen ") || lowerClean.startsWith("welche ") || lowerClean.startsWith("welcher ") || lowerClean.startsWith("welches ") || lowerClean.startsWith("ob ") || lowerClean.startsWith("kannst ") || lowerClean.startsWith("kann ")) {
@@ -120,7 +115,6 @@
             recognition.onresult = function(event) {
                 const rawText = event.results[0][0].transcript.trim();
                 if (rawText) {
-                    // NEU: Text polieren, bevor er ins Eingabefeld kommt
                     const polishedText = cleanVoiceText(rawText);
                     document.getElementById('user-input').value = polishedText;
                     sendMessage();
@@ -252,7 +246,7 @@
                         "Authorization": `Bearer ${API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: "deepseek-reasoner",
+                        model: "deepseek-r1",
                         messages: conversationHistory,
                         temperature: 0.8,
                         max_tokens: 500
