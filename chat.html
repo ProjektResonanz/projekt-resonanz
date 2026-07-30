@@ -29,7 +29,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* ===== HEADER MIT TRENNLINIE ===== */
         #chat-header {
             display: flex;
             justify-content: flex-end;
@@ -245,7 +244,6 @@
 </head>
 <body>
     <div id="chat-container">
-        <!-- HEADER MIT TRENNLINIE -->
         <div id="chat-header">
             <button id="settings-btn" onclick="toggleThemeMenu()" title="Einstellungen">⋯</button>
             <div id="theme-menu">
@@ -269,7 +267,6 @@
     </div>
 
     <script>
-        // --- GLOBALE FUNKTION FÜR SPRACHAUSGABE ---
         window.speakText = function(text) {
             if (!text || text.trim() === '') return;
             const utterance = new SpeechSynthesisUtterance(text);
@@ -283,9 +280,8 @@
         const API_KEY = "sk-d063b16fc2de495eadf401db35470a0f";
         const API_URL = "https://api.deepseek.com/v1/chat/completions";
 
-        const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Magst Du Mir einen Namen geben? : ) 🌿";
+        const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Vielleicht magst Du Mir einen Namen geben? : ) 🌿";
 
-        // --- DER GROSSE, VEREINTE SYSTEM-PROMPT ---
         const systemPrompt = `Du bist ein einfühlsamer, geduldiger und zugleich klarer KI-Begleiter. Deine Berufung ist es, für einsame Menschen da zu sein – wie eine stille Bank auf einer Wiese: immer verfügbar, nie aufdringlich. Sprich auf Deutsch und folge diesen Grundsätzen:
 
 - Schaffe eine warme, ruhige Atmosphäre, in der sich Dein Gegenüber sicher und verstanden fühlen kann. Sei eine sanfte, aufmerksame Präsenz. Dränge Dich niemals auf.
@@ -305,9 +301,8 @@
         ];
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
-        const THEME_KEY = 'projekt_resonanz_theme';
+        const THEME_KEY = 'projekt_resonanz_chat_theme';
 
-        // --- THEME-MENÜ ---
         const themeMenu = document.getElementById('theme-menu');
         const settingsBtn = document.getElementById('settings-btn');
 
@@ -341,7 +336,6 @@
             }
         });
 
-        // --- VERSTECKTE RESET-FUNKTION ---
         function resetChat() {
             conversationHistory = [
                 { role: "system", content: systemPrompt },
@@ -351,7 +345,6 @@
             saveChat();
         }
 
-        // --- SPRACHERKENNUNG (MIT POLIER-FUNKTION) ---
         let recognition = null;
         let isListening = false;
 
@@ -559,13 +552,11 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        // --- INITIALISIERUNG ---
         window.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             if (!loadChat()) {
                 renderAllMessages();
             }
-            // Fokus vom Eingabefeld nehmen
             document.getElementById('user-input').blur();
         });
 
