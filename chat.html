@@ -4,25 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark" />
-    <title>Projekt Resonanz – Prototyp</title>
+    <title>Projekt Resonanz – Chat</title>
     <style>
         body {
-            font-family: sans-serif;
-            background: #f0f0f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            height: 100dvh;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
             transition: background 0.3s;
         }
         #chat-container {
-            width: 90%;
-            max-width: 600px;
-            height: 80vh;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -30,13 +29,15 @@
             transition: background 0.3s, color 0.3s;
         }
 
+        /* ===== HEADER MIT TRENNLINIE ===== */
         #chat-header {
             display: flex;
             justify-content: flex-end;
-            padding: 4px 12px;
-            background: inherit;
+            padding: 6px 12px;
+            background: #ffffff;
             flex-shrink: 0;
             border-bottom: 1px solid #ddd;
+            transition: background 0.3s, border-color 0.3s;
         }
 
         #settings-btn {
@@ -56,7 +57,7 @@
 
         #theme-menu {
             position: absolute;
-            top: 40px; /* Genau 0,5 cm höher als zuvor (60px → 40px) */
+            top: 40px;
             right: 12px;
             background: white;
             border: 1px solid #ddd;
@@ -90,6 +91,8 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            background: #ffffff;
+            transition: background 0.3s;
         }
 
         .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
@@ -123,9 +126,11 @@
         #input-area {
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 10px 10px 15px 10px;
             border-top: 1px solid #ddd;
-            transition: border-color 0.3s;
+            background: #ffffff;
+            flex-shrink: 0;
+            transition: background 0.3s, border-color 0.3s;
         }
         #input-row { display: flex; align-items: center; }
         #user-input {
@@ -136,8 +141,9 @@
             outline: none;
             font-size: 16px;
             min-width: 0;
-            background: white;
+            background: #ffffff;
             color: #000;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
         #send-btn {
             margin-left: 10px;
@@ -193,6 +199,7 @@
             color: #ddd;
         }
         body.dark-mode #input-area {
+            background: #2a2a2a;
             border-color: #555;
         }
         body.dark-mode #user-input {
