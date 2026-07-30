@@ -565,6 +565,8 @@
             if (!loadChat()) {
                 renderAllMessages();
             }
+            // Fokus vom Eingabefeld nehmen
+            document.getElementById('user-input').blur();
         });
 
         document.getElementById('user-input').addEventListener('keydown', function(e) {
