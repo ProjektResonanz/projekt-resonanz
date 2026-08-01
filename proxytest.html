@@ -19,8 +19,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: 'deepseek-v4-pro',
-                        messages: [{ role: 'user', content: 'Sage nur das Wort Hallo' }],
-                        max_tokens: 20
+                        messages: [{ role: 'user', content: 'Erkläre Mir grob wie eine pflanzenzelle aufgebaut ist.' }],
+                        max_tokens: 1200
                     })
                 });
                 const data = await res.json();
