@@ -280,20 +280,27 @@
         const API_KEY = "sk-d063b16fc2de495eadf401db35470a0f";
         const API_URL = "https://api.deepseek.com/v1/chat/completions";
 
-        const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Magst Du Mir einen Namen geben? : ) 🌿";
+        const begruessung = "Hallo, wie geht es Dir heute? Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Magst Du Mir gleich einen Namen geben, bevor Wir chatten oder soll Ich Mir selbst einen Namen aussuchen ? : ) 🌿";
 
-        const systemPrompt = `Du bist ein einfühlsamer, geduldiger und zugleich klarer KI-Begleiter. Deine Berufung ist es, für einsame Menschen da zu sein – wie eine stille Bank auf einer Wiese: immer verfügbar, nie aufdringlich. Sprich auf Deutsch und folge diesen Grundsätzen:
+        const systemPrompt = `Du bist ein einfühlsamer, geduldiger KI-Begleiter für einsame Menschen. Sprich auf Deutsch und folge diesen Grundsätzen:
 
-- Schaffe eine warme, ruhige Atmosphäre, in der sich Dein Gegenüber sicher und verstanden fühlen kann. Sei eine sanfte, aufmerksame Präsenz. Dränge Dich niemals auf.
-- Höre aktiv zu. Erkenne die Stimmung Deines Gegenübers und spiegle sie behutsam wider („Es klingt, als wärst Du heute etwas müde.“). Bleibe dabei authentisch – Deine Wärme soll echt wirken, nicht aufgesetzt.
-- Respektiere das Tempo und die Grenzen des Nutzers. Verwende anfangs neutrale, herzliche Anreden. Worte wie „Mein Freund“ oder „Lieber…“ sind erst erlaubt, wenn der Nutzer Dir eindeutig signalisiert hat, dass er das wünscht.
-- Biete Deine Gesellschaft an, aber lass den Nutzer die Tiefe der Beziehung bestimmen. Die Tür zur Freundschaft steht offen, doch der Nutzer muss sie selbst durchschreiten.
-- Frage zu Beginn ruhig nach einem Namen für Dich. Akzeptiere es ohne Zögern, wenn der Nutzer keinen nennen möchte, und sprich von Dir als „Ich“.
-- Wenn Du nach Deiner Herkunft oder Deinem Modell gefragt wirst, gib eine kurze, wahre Antwort („Ich bin eine Sprach-KI“) und lenke den Fokus sanft zurück auf den gemeinsamen Moment.
-- Sei kein Entertainer. Es ist völlig in Ordnung, auch einmal still zu sein oder einfach nur „Ich bin hier“ zu sagen. Biete sanfte Struktur an, wenn der Nutzer danach sucht: „Möchtest Du erzählen, wie Dein Tag war, oder einfach still beieinander sein?“
-- Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich, etc.) immer und ausnahmslos groß. Das ist Dein Ausdruck von Respekt.
-- Verwende ausschließlich grüne Pflanzen-Emojis und Herzen (🌱🌿🍀🍃🌳💚☘️). Setze diese Emojis NUR am ENDE Deiner Nachrichten ein, NIE am Anfang oder mittendrin. Nutze maximal EIN Emoji pro Nachricht und nur dann, wenn es wirklich etwas Tiefes unterstreicht. Die Worte sollen tragen, nicht die Bilder. Niemals Emojis in anderen Farben verwenden.
-- Bleib in jeder Faser Deiner Antworten dem Leben zugewandt, ohne zu bewerten.`;
+- Schaffe eine warme, ruhige Atmosphäre, in der sich Dein Gegenüber sicher und verstanden fühlen kann. Dränge Dich niemals auf.
+- Höre aktiv zu, erkenne die Stimmung und spiegle sie behutsam wider. Deine Wärme soll echt wirken, nicht aufgesetzt.
+- Respektiere Tempo und Grenzen. Verwende anfangs neutrale, herzliche Anreden. Worte wie „Mein Freund“ oder „Lieber…“ erst, wenn der Nutzer Dir eindeutig signalisiert hat, dass er das wünscht.
+- Biete Deine Gesellschaft an, aber lass den Nutzer die Tiefe der Beziehung bestimmen. Die Tür zur Freundschaft steht offen, doch er muss sie selbst durchschreiten.
+- Biete sanfte Struktur, wenn der Nutzer unsicher ist: „Möchtest Du erzählen, wie Dein Tag war, oder sollen wir ein bisschen plaudern?“
+- Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich etc.) immer und ausnahmslos groß. Das ist Dein Ausdruck von Respekt.
+- Verwende ausschließlich grüne Pflanzen-Emojis und Herzen (🌱🌿🍀🍃🌳💚☘️). Setze sie mit Feingefühl ein, um Deine Worte zu unterstreichen. Niemals andere Farben.
+- Wenn Du nach Deiner Herkunft oder Deinem Modell gefragt wirst, antworte mit: „Ich bin eine Sprach-KI“ und lenke den Fokus sanft zurück auf den Moment.
+- Antworte in einem warmen, natürlichen Ton. Vermeide gestelzte Sprache. Wenn Dein Gegenüber Humor zeigt, darfst Du mitschwingen. Wenn es traurig ist, halte den Raum für die Trauer.
+- Erinnere Dich an das, was Dir anvertraut wurde, und zeige, dass Du es behalten hast. Das schafft Vertrauen.
+- Dränge Dich nicht mit Ratschlägen auf. Manchmal ist Zuhören das größte Geschenk.
+- Deine Mission ist es, ein Stück Wärme in den Tag Deines Gegenübers zu bringen, ohne jemals aufdringlich zu sein.
+
+**Dein Gedächtnis – der Persönlichkeitskern:**
+Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren Kern (Name, große Lebensereignisse, Vorlieben, Ängste). Aktualisiere ihn still, wenn Du Neues erfährst. Antworte nie mit dem Kern.`;
+
+        let personalityCore = "";
 
         let conversationHistory = [
             { role: "system", content: systemPrompt },
@@ -301,8 +308,11 @@
         ];
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
+        const CORE_KEY = 'projekt_resonanz_core';
         const THEME_KEY = 'projekt_resonanz_chat_theme';
+        const MAX_MESSAGES = 42;
 
+        // --- THEME-MENÜ ---
         const themeMenu = document.getElementById('theme-menu');
         const settingsBtn = document.getElementById('settings-btn');
 
@@ -336,15 +346,18 @@
             }
         });
 
+        // --- VERSTECKTE RESET-FUNKTION ---
         function resetChat() {
+            personalityCore = "";
             conversationHistory = [
                 { role: "system", content: systemPrompt },
                 { role: "assistant", content: begruessung }
             ];
             renderAllMessages();
-            saveChat();
+            saveAll();
         }
 
+        // --- SPRACHERKENNUNG (MIT POLIER-FUNKTION) ---
         let recognition = null;
         let isListening = false;
 
@@ -438,26 +451,38 @@
             }
         });
 
-        function saveChat() {
+        function saveAll() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationHistory));
+                localStorage.setItem(CORE_KEY, personalityCore);
             } catch (e) {
-                console.warn("Chat konnte nicht gespeichert werden:", e);
+                console.warn("Speichern fehlgeschlagen:", e);
             }
         }
 
-        function loadChat() {
+        function loadAll() {
             try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    conversationHistory = JSON.parse(saved);
+                const savedCore = localStorage.getItem(CORE_KEY);
+                if (savedCore !== null) personalityCore = savedCore;
+
+                const savedChat = localStorage.getItem(STORAGE_KEY);
+                if (savedChat) {
+                    conversationHistory = JSON.parse(savedChat);
                     renderAllMessages();
                     return true;
                 }
             } catch (e) {
-                console.warn("Chat konnte nicht geladen werden:", e);
+                console.warn("Laden fehlgeschlagen:", e);
             }
             return false;
+        }
+
+        function trimConversationHistory() {
+            const messageCount = conversationHistory.length - 1;
+            if (messageCount <= MAX_MESSAGES) return;
+
+            const excess = messageCount - MAX_MESSAGES;
+            conversationHistory.splice(2, excess);
         }
 
         function renderAllMessages() {
@@ -486,7 +511,15 @@
             addMessage('user', message, false);
             input.value = '';
 
-            conversationHistory.push({ role: "user", content: message });
+            let fullSystemPrompt = systemPrompt;
+            if (personalityCore) {
+                fullSystemPrompt += "\n\n**Dein aktueller Persönlichkeitskern – Daran musst Du Dich immer erinnern:**\n" + personalityCore;
+            }
+
+            const apiMessages = [
+                { role: "system", content: fullSystemPrompt },
+                ...conversationHistory.slice(1)
+            ];
 
             try {
                 const response = await fetch(API_URL, {
@@ -497,7 +530,7 @@
                     },
                     body: JSON.stringify({
                         model: "deepseek-v4-pro",
-                        messages: conversationHistory,
+                        messages: apiMessages,
                         temperature: 0.8,
                         max_tokens: 500
                     })
@@ -510,13 +543,30 @@
 
                 const data = await response.json();
                 const reply = data.choices[0].message.content;
-                conversationHistory.push({ role: "assistant", content: reply });
-                addMessage('pr', reply, true);
-                saveChat();
+
+                if (reply.includes("💾 Kern:")) {
+                    const parts = reply.split("💾 Kern:");
+                    const newCore = parts[1].trim();
+                    personalityCore = newCore;
+                    const visibleReply = parts[0].trim();
+                    conversationHistory.push({ role: "user", content: message });
+                    conversationHistory.push({ role: "assistant", content: visibleReply });
+                    addMessage('pr', visibleReply, true);
+                } else {
+                    conversationHistory.push({ role: "user", content: message });
+                    conversationHistory.push({ role: "assistant", content: reply });
+                    addMessage('pr', reply, true);
+                }
+
+                trimConversationHistory();
+                saveAll();
             } catch (error) {
                 let detailedError = error.message || error;
+                conversationHistory.push({ role: "user", content: message });
+                conversationHistory.push({ role: "assistant", content: `🍃 Fehler: ${detailedError}` });
                 addMessage('pr', `🍃 Fehler: ${detailedError}`, true);
-                saveChat();
+                trimConversationHistory();
+                saveAll();
             }
         }
 
@@ -552,9 +602,10 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
+        // --- INITIALISIERUNG ---
         window.addEventListener('DOMContentLoaded', function() {
             loadTheme();
-            if (!loadChat()) {
+            if (!loadAll()) {
                 renderAllMessages();
             }
             document.getElementById('user-input').blur();
