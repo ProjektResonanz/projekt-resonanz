@@ -13,7 +13,8 @@
             const out = document.getElementById('out');
             out.textContent = 'Sende...';
             try {
-                const res = await fetch('https://projekt-resonanz-proxy.onrender.com/chat', {
+                // ⚠️ HIER DEINE RICHTIGE RENDER-URL EINTRAGEN ⚠️
+                const res = await fetch('https://projekt-resonanz-proxy.onrender.com', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
