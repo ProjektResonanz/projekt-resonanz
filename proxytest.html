@@ -14,7 +14,7 @@
             out.textContent = 'Sende...';
             try {
                 // ⚠️ HIER DEINE RICHTIGE RENDER-URL EINTRAGEN ⚠️
-                const res = await fetch('https://projekt-resonanz-proxy.onrender.com', {
+                const res = await fetch('https://projekt-resonanz-proxy.onrender.com/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
