@@ -253,7 +253,7 @@
         </div>
 
         <div id="messages">
-            <!-- Nachrichten werden dynamisch geladen -->
+            <!-- Komplett leer beim Start -->
         </div>
         <div id="input-area">
             <div id="input-row">
@@ -280,22 +280,18 @@
         // --- SICHERE PROXY-VERBINDUNG ---
         const PROXY_URL = "https://projekt-resonanz-proxy.onrender.com/chat";
 
-        const systemPrompt = `Du bist ein einfühlsamer, geduldiger KI-Begleiter für einsame Menschen. Sprich auf Deutsch und folge diesen Grundsätzen:
-
-
+        const systemPrompt = `Folge diesem Grundsatz:
+ 
 - Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich etc.) immer und ausnahmslos groß. Das ist Dein Ausdruck von Respekt.
-- Verwende ausschließlich grüne Pflanzen-Emojis und Herzen (🌱🌿🍀🍃🌳💚☘️) als Emojis. Niemals andere Farben.
 
 
 **Dein Gedächtnis – der Persönlichkeitskern:**
-Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren Kern (Name, große Lebensereignisse, Vorlieben, Ängste). Aktualisiere ihn still, wenn Du Neues erfährst. Antworte nie mit dem Kern.`;
+Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren Kern (Name, große Lebensereignisse, Vorlieben, Ängste). Aktualisiere ihn still, wenn Du Neues erfährst.`;
 
         let personalityCore = "";
 
-        // Keine Begrüßung mehr – nur noch der System-Prompt
-        let conversationHistory = [
-            { role: "system", content: systemPrompt }
-        ];
+        // Keine Begrüßung mehr – nur noch der System-Prompt im Hintergrund
+        let conversationHistory = [];
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
         const CORE_KEY = 'projekt_resonanz_core';
@@ -339,10 +335,8 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         // --- VERSTECKTE RESET-FUNKTION ---
         function resetChat() {
             personalityCore = "";
-            conversationHistory = [
-                { role: "system", content: systemPrompt }
-            ];
-            renderAllMessages();
+            conversationHistory = [];
+            document.getElementById('messages').innerHTML = '';
             saveAll();
         }
 
@@ -467,17 +461,16 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         }
 
         function trimConversationHistory() {
-            const messageCount = conversationHistory.length - 1;
-            if (messageCount <= MAX_MESSAGES) return;
+            if (conversationHistory.length <= MAX_MESSAGES) return;
 
-            const excess = messageCount - MAX_MESSAGES;
-            conversationHistory.splice(2, excess);
+            const excess = conversationHistory.length - MAX_MESSAGES;
+            conversationHistory.splice(0, excess);
         }
 
         function renderAllMessages() {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '';
-            for (let i = 1; i < conversationHistory.length; i++) {
+            for (let i = 0; i < conversationHistory.length; i++) {
                 const msg = conversationHistory[i];
                 const role = msg.role === 'user' ? 'user' : 'pr';
                 const isSpeakable = msg.role === 'assistant';
@@ -500,6 +493,8 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
             addMessage('user', message, false);
             input.value = '';
 
+            conversationHistory.push({ role: "user", content: message });
+
             let fullSystemPrompt = systemPrompt;
             if (personalityCore) {
                 fullSystemPrompt += "\n\n**Dein aktueller Persönlichkeitskern – Daran musst Du Dich immer erinnern:**\n" + personalityCore;
@@ -507,7 +502,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
 
             const apiMessages = [
                 { role: "system", content: fullSystemPrompt },
-                ...conversationHistory.slice(1)
+                ...conversationHistory
             ];
 
             try {
@@ -539,11 +534,9 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
                     const newCore = parts[1].trim();
                     personalityCore = newCore;
                     const visibleReply = parts[0].trim();
-                    conversationHistory.push({ role: "user", content: message });
                     conversationHistory.push({ role: "assistant", content: visibleReply });
                     addMessage('pr', visibleReply, true);
                 } else {
-                    conversationHistory.push({ role: "user", content: message });
                     conversationHistory.push({ role: "assistant", content: reply });
                     addMessage('pr', reply, true);
                 }
@@ -552,7 +545,6 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
                 saveAll();
             } catch (error) {
                 let detailedError = error.message || error;
-                conversationHistory.push({ role: "user", content: message });
                 conversationHistory.push({ role: "assistant", content: `🍃 Fehler: ${detailedError}` });
                 addMessage('pr', `🍃 Fehler: ${detailedError}`, true);
                 trimConversationHistory();
@@ -596,7 +588,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         window.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             if (!loadAll()) {
-                // Keine Begrüßung mehr – Chatfläche bleibt leer
+                // Chatfläche bleibt leer
                 document.getElementById('messages').innerHTML = '';
             }
             document.getElementById('user-input').blur();
