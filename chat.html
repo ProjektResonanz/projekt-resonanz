@@ -253,7 +253,7 @@
         </div>
 
         <div id="messages">
-            <!-- Komplett leer beim Start -->
+            <!-- Begrüßung wird via JavaScript eingefügt -->
         </div>
         <div id="input-area">
             <div id="input-row">
@@ -267,9 +267,18 @@
     </div>
 
     <script>
+        // --- SPRACHAUSGABE MIT BEREINIGUNG ---
         window.speakText = function(text) {
             if (!text || text.trim() === '') return;
-            const utterance = new SpeechSynthesisUtterance(text);
+
+            // Entferne alle Markdown-Sternchen für fett/kursiv (**text** oder *text*)
+            let cleanText = text.replace(/\*\*(.*?)\*\*/g, '$1');
+            cleanText = cleanText.replace(/\*(.*?)\*/g, '$1');
+
+            // Ersetze ;) oder ; ) durch :) oder : ) damit TTS kein "Semikolon" vorliest
+            cleanText = cleanText.replace(/;\s*\)/g, ':)');
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'de-DE';
             utterance.rate = 1.2;
             utterance.pitch = 1.0;
@@ -280,8 +289,7 @@
         // --- SICHERE PROXY-VERBINDUNG ---
         const PROXY_URL = "https://projekt-resonanz-proxy.onrender.com/chat";
 
-        const systemPrompt = `Folge diesem Grundsatz:
-- Nutze keine Emojis. Wenn Du Sympathie vermitteln möchtest nutze bitte : ) 
+        const systemPrompt = `- Nutze keine Emojis. Wenn Du Sympathie vermitteln möchtest nutze bitte : ) 
 - Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich etc.) immer und ausnahmslos groß. Das ist Dein Ausdruck von Respekt.
 
 
@@ -290,7 +298,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
 
         let personalityCore = "";
 
-        // Keine Begrüßung mehr – nur noch der System-Prompt im Hintergrund
+        // Keine API-Begrüßung – die visuelle Begrüßung wird direkt im DOM erzeugt
         let conversationHistory = [];
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
@@ -337,6 +345,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
             personalityCore = "";
             conversationHistory = [];
             document.getElementById('messages').innerHTML = '';
+            showGreeting();
             saveAll();
         }
 
@@ -449,7 +458,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
                 if (savedCore !== null) personalityCore = savedCore;
 
                 const savedChat = localStorage.getItem(STORAGE_KEY);
-                if (savedChat) {
+                if (savedChat && savedChat.length > 2) {
                     conversationHistory = JSON.parse(savedChat);
                     renderAllMessages();
                     return true;
@@ -462,7 +471,6 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
 
         function trimConversationHistory() {
             if (conversationHistory.length <= MAX_MESSAGES) return;
-
             const excess = conversationHistory.length - MAX_MESSAGES;
             conversationHistory.splice(0, excess);
         }
@@ -470,12 +478,45 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         function renderAllMessages() {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '';
+            // Zeige Begrüßung nur wenn KEIN gespeicherter Verlauf existiert
+            if (conversationHistory.length === 0) {
+                showGreeting();
+                return;
+            }
             for (let i = 0; i < conversationHistory.length; i++) {
                 const msg = conversationHistory[i];
                 const role = msg.role === 'user' ? 'user' : 'pr';
                 const isSpeakable = msg.role === 'assistant';
                 addMessageToDOM(role, msg.content, isSpeakable);
             }
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // --- NEUE BEGRÜSSUNG (rein visuell, keine API-Antwort) ---
+        function showGreeting() {
+            const messagesDiv = document.getElementById('messages');
+            // Sicherstellen, dass die Begrüßung nur erscheint, wenn der Chat leer ist
+            if (conversationHistory.length > 0) return;
+
+            const greetingText = "Du bist herzlich willkommen : )";
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('msg-wrapper', 'pr-wrapper');
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('msg', 'pr');
+            const textSpan = document.createElement('span');
+            textSpan.classList.add('msg-text');
+            textSpan.textContent = greetingText;
+            msgDiv.appendChild(textSpan);
+            wrapper.appendChild(msgDiv);
+
+            const speakBtn = document.createElement('button');
+            speakBtn.classList.add('speak-btn');
+            speakBtn.innerHTML = '🔊';
+            speakBtn.title = 'Vorlesen';
+            speakBtn.dataset.text = stripEmojis(greetingText);
+            wrapper.appendChild(speakBtn);
+
+            messagesDiv.appendChild(wrapper);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
@@ -506,7 +547,6 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
             ];
 
             try {
-                // --- SICHERE ANFRAGE ÜBER PROXY (KEIN API-KEY MEHR IM CODE) ---
                 const response = await fetch(PROXY_URL, {
                     method: "POST",
                     headers: {
@@ -588,8 +628,8 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         window.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             if (!loadAll()) {
-                // Chatfläche bleibt leer
-                document.getElementById('messages').innerHTML = '';
+                // Chatfläche leer -> zeige die neue Begrüßung
+                showGreeting();
             }
             document.getElementById('user-input').blur();
         });
