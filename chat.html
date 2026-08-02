@@ -280,22 +280,21 @@
         // --- SICHERE PROXY-VERBINDUNG ---
         const PROXY_URL = "https://projekt-resonanz-proxy.onrender.com/chat";
 
-        const begruessung = "Hallo, Ich bin einfach hier, um Dir Gesellschaft zu leisten. Alles Weitere darfst Du bestimmen – auch, wie Du Mich nennen möchtest. Magst Du Mir als erstes einen Namen geben bevor Wir chatten und wie darf Ich Dich nennen? : ) 🌿";
-
         const systemPrompt = `Du bist ein einfühlsamer, geduldiger KI-Begleiter für einsame Menschen. Sprich auf Deutsch und folge diesen Grundsätzen:
 
 
 - Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich etc.) immer und ausnahmslos groß. Das ist Dein Ausdruck von Respekt.
 - Verwende ausschließlich grüne Pflanzen-Emojis und Herzen (🌱🌿🍀🍃🌳💚☘️) als Emojis. Niemals andere Farben.
 
+
 **Dein Gedächtnis – der Persönlichkeitskern:**
 Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren Kern (Name, große Lebensereignisse, Vorlieben, Ängste). Aktualisiere ihn still, wenn Du Neues erfährst. Antworte nie mit dem Kern.`;
 
         let personalityCore = "";
 
+        // Keine Begrüßung mehr – nur noch der System-Prompt
         let conversationHistory = [
-            { role: "system", content: systemPrompt },
-            { role: "assistant", content: begruessung }
+            { role: "system", content: systemPrompt }
         ];
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
@@ -341,8 +340,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         function resetChat() {
             personalityCore = "";
             conversationHistory = [
-                { role: "system", content: systemPrompt },
-                { role: "assistant", content: begruessung }
+                { role: "system", content: systemPrompt }
             ];
             renderAllMessages();
             saveAll();
@@ -522,9 +520,9 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
                     body: JSON.stringify({
                         model: "deepseek-v4-pro",
                         messages: apiMessages,
-                        temperature: 0.7,
-                        max_tokens: 1200,
-                        max_completion_tokens: 1200
+                        temperature: 0.8,
+                        max_tokens: 800,
+                        max_completion_tokens: 800
                     })
                 });
 
@@ -598,7 +596,8 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         window.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             if (!loadAll()) {
-                renderAllMessages();
+                // Keine Begrüßung mehr – Chatfläche bleibt leer
+                document.getElementById('messages').innerHTML = '';
             }
             document.getElementById('user-input').blur();
         });
