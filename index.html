@@ -131,8 +131,6 @@
             transform: translateY(2px);
             box-shadow: 0 3px 10px rgba(40, 167, 69, 0.2);
         }
-        /* Die alten .continue-button-Regeln können bleiben, stören aber nicht,
-           da der Button jetzt nur noch die Klasse .chat-button trägt. */
         .separator {
             font-size: 13px;
             color: #6b7b6e;
@@ -268,7 +266,8 @@
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (!saved) return false;
                 const history = JSON.parse(saved);
-                return history && history.length > 2;
+                // Jetzt zählt jeder Chat, sobald auch nur eine Nachricht gespeichert ist
+                return history && history.length > 0;
             } catch (e) {
                 return false;
             }
