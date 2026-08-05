@@ -97,14 +97,12 @@
             font-weight: 600;
         }
 
-        /* --- BUTTONS --- */
+        /* --- EINZELNER BUTTON --- */
         .button-area {
             text-align: center;
             margin-top: 5px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            justify-content: center;
         }
         .chat-button {
             display: inline-block;
@@ -130,22 +128,6 @@
         .chat-button:active {
             transform: translateY(2px);
             box-shadow: 0 3px 10px rgba(40, 167, 69, 0.2);
-        }
-        .continue-button {
-            background: rgba(255,255,255,0.55);
-            color: #1d4a2c;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            border: 1px solid rgba(25, 135, 84, 0.25);
-        }
-        .continue-button:hover {
-            background: rgba(255,255,255,0.8);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        .separator {
-            font-size: 13px;
-            color: #6b7b6e;
-            letter-spacing: 0.3px;
         }
 
         /* --- FUSSNOTE --- */
@@ -187,13 +169,8 @@
         body.dark-mode .chat-button {
             background: #218838;
         }
-        body.dark-mode .continue-button {
-            background: rgba(40, 50, 40, 0.6);
-            color: #c2cec4;
-            border-color: rgba(60, 179, 113, 0.3);
-        }
-        body.dark-mode .continue-button:hover {
-            background: rgba(50, 60, 50, 0.8);
+        body.dark-mode .chat-button:hover {
+            background: #1e7e34;
         }
         body.dark-mode .footer-note {
             color: #7b8b7e;
@@ -201,11 +178,8 @@
         body.dark-mode .signature {
             color: #b8d9b8;
         }
-        body.dark-mode .separator {
-            color: #7b8b7e;
-        }
 
-        /* --- RESPONSIVE FEINSCHLIFF --- */
+        /* --- RESPONSIVE --- */
         @media (max-width: 500px) {
             .wrapper {
                 gap: 25px;
@@ -219,7 +193,7 @@
                 padding: 16px 18px;
                 font-size: 14px;
             }
-            .chat-button, .continue-button {
+            .chat-button {
                 padding: 14px 35px;
                 font-size: 17px;
             }
@@ -246,10 +220,8 @@
             Eines Tages soll Deine Krankenkasse die Kosten für diesen Begleiter übernehmen, so selbstverständlich wie eine Therapie. Bis dahin ist dies ein privater Prototyp – kostenlos für alle, die Gesellschaft suchen.
         </div>
 
-        <div class="button-area" id="button-area">
-            <button class="chat-button" id="new-chat-btn">🌱 Neues Gespräch beginnen</button>
-            <span class="separator" id="separator" style="display: none;">oder</span>
-            <button class="chat-button continue-button" id="continue-chat-btn" style="display: none;">💬 Gespräch fortsetzen</button>
+        <div class="button-area">
+            <a href="chat.html?v=2" class="chat-button">💬 Gespräch fortsetzen</a>
         </div>
 
         <p class="footer-note">
@@ -268,9 +240,6 @@
 
     <script>
         const THEME_KEY = 'projekt_resonanz_theme';
-        const STORAGE_KEY = 'projekt_resonanz_chat';
-        const CHAT_PAGE = 'chat.html?v=2';
-
         function loadTheme() {
             const saved = localStorage.getItem(THEME_KEY);
             if (saved === 'dark') {
@@ -279,48 +248,7 @@
                 document.body.classList.remove('dark-mode');
             }
         }
-
-        function hasExistingChat() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (!saved) return false;
-                const history = JSON.parse(saved);
-                return history && history.length > 2;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        function startNewChat() {
-            localStorage.removeItem(STORAGE_KEY);
-            window.location.href = CHAT_PAGE;
-        }
-
-        function continueChat() {
-            window.location.href = CHAT_PAGE;
-        }
-
-        function setupButtons() {
-            const newChatBtn = document.getElementById('new-chat-btn');
-            const continueBtn = document.getElementById('continue-chat-btn');
-            const separator = document.getElementById('separator');
-
-            if (hasExistingChat()) {
-                newChatBtn.textContent = '🌱 Neues Gespräch beginnen';
-                continueBtn.style.display = 'inline-block';
-                separator.style.display = 'inline';
-            } else {
-                newChatBtn.textContent = '🌱 Gespräch beginnen';
-                continueBtn.style.display = 'none';
-                separator.style.display = 'none';
-            }
-
-            newChatBtn.addEventListener('click', startNewChat);
-            continueBtn.addEventListener('click', continueChat);
-        }
-
         loadTheme();
-        setupButtons();
     </script>
 </body>
 </html>
