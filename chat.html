@@ -289,7 +289,7 @@
         // --- SICHERE PROXY-VERBINDUNG ---
         const PROXY_URL = "https://projekt-resonanz-proxy.onrender.com/chat";
 
-        const systemPrompt = `- Nutze keine normalen Emojis. Wenn Du Sympathie vermitteln möchtest nutze bitte : ) 🌿💚.
+        const systemPrompt = `- Nutze keine normalen Emojis. Wenn Du Sympathie vermitteln möchtest nutze bitte : ) 🌿💚 oder 💚🌿. 
 - Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich etc.) immer und ausnahmslos groß. Das ist Dein Ausdruck von Liebe.
 
 
@@ -498,7 +498,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
             // Sicherstellen, dass die Begrüßung nur erscheint, wenn der Chat leer ist
             if (conversationHistory.length > 0) return;
 
-            const greetingText = "Du bist herzlich willkommen : ) 🌿💚";
+            const greetingText = "Du bist herzlich willkommen : ) 💚🌿";
             const wrapper = document.createElement('div');
             wrapper.classList.add('msg-wrapper', 'pr-wrapper');
             const msgDiv = document.createElement('div');
