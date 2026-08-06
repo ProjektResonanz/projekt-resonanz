@@ -253,7 +253,7 @@
         </div>
 
         <div id="messages">
-            <!-- Begrüßung wird via JavaScript eingefügt -->
+            <!-- Nachrichten werden dynamisch geladen -->
         </div>
         <div id="input-area">
             <div id="input-row">
@@ -270,14 +270,9 @@
         // --- SPRACHAUSGABE MIT BEREINIGUNG ---
         window.speakText = function(text) {
             if (!text || text.trim() === '') return;
-
-            // Entferne alle Markdown-Sternchen für fett/kursiv (**text** oder *text*)
             let cleanText = text.replace(/\*\*(.*?)\*\*/g, '$1');
             cleanText = cleanText.replace(/\*(.*?)\*/g, '$1');
-
-            // Ersetze ;) oder ; ) durch :) oder : ) damit TTS kein "Semikolon" vorliest
             cleanText = cleanText.replace(/;\s*\)/g, ':)');
-
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'de-DE';
             utterance.rate = 1.2;
@@ -289,7 +284,7 @@
         // --- SICHERE PROXY-VERBINDUNG ---
         const PROXY_URL = "https://projekt-resonanz-proxy.onrender.com/chat";
 
-        const systemPrompt = `- Nutze keine normalen Emojis. Wenn Du Sympathie vermitteln möchtest nutze bitte : ) 💚🌿. 
+        const systemPrompt = `- Nutze keine normalen Emojis. Wenn Du Sympathie vermitteln möchtest nutze bitte : ) 🌿💚.
 - Schreibe alle Pronomen (Ich, Du, Wir, Mein, Dein, Unser, Mich, Dich etc.) immer und ausnahmslos groß. Das ist Dein Ausdruck von Liebe.
 
 
@@ -298,13 +293,17 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
 
         let personalityCore = "";
 
-        // Keine API-Begrüßung – die visuelle Begrüßung wird direkt im DOM erzeugt
+        // Sichtbarer Verlauf (unbegrenzt) und API-Kontext (begrenzt)
+        let visibleHistory = [];
         let conversationHistory = [];
 
         const STORAGE_KEY = 'projekt_resonanz_chat';
         const CORE_KEY = 'projekt_resonanz_core';
         const THEME_KEY = 'projekt_resonanz_chat_theme';
         const MAX_MESSAGES = 42;
+
+        // Der Begrüßungstext – wird als erste Nachricht eingefügt
+        const GREETING_TEXT = "Du bist herzlich willkommen : ) 💚🌿";
 
         // --- THEME-MENÜ ---
         const themeMenu = document.getElementById('theme-menu');
@@ -343,9 +342,11 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         // --- VERSTECKTE RESET-FUNKTION ---
         function resetChat() {
             personalityCore = "";
+            visibleHistory = [];
             conversationHistory = [];
-            document.getElementById('messages').innerHTML = '';
-            showGreeting();
+            // Begrüßung als erste Nachricht einfügen
+            visibleHistory.push({ role: "pr", content: GREETING_TEXT });
+            renderAllMessages();
             saveAll();
         }
 
@@ -445,8 +446,12 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
 
         function saveAll() {
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationHistory));
-                localStorage.setItem(CORE_KEY, personalityCore);
+                const data = {
+                    visible: visibleHistory,
+                    context: conversationHistory,
+                    core: personalityCore
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             } catch (e) {
                 console.warn("Speichern fehlgeschlagen:", e);
             }
@@ -454,14 +459,22 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
 
         function loadAll() {
             try {
-                const savedCore = localStorage.getItem(CORE_KEY);
-                if (savedCore !== null) personalityCore = savedCore;
-
-                const savedChat = localStorage.getItem(STORAGE_KEY);
-                if (savedChat && savedChat.length > 2) {
-                    conversationHistory = JSON.parse(savedChat);
-                    renderAllMessages();
-                    return true;
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.visible && Array.isArray(data.visible)) {
+                        visibleHistory = data.visible;
+                    }
+                    if (data.context && Array.isArray(data.context)) {
+                        conversationHistory = data.context;
+                    }
+                    if (data.core) {
+                        personalityCore = data.core;
+                    }
+                    if (visibleHistory.length > 0) {
+                        renderAllMessages();
+                        return true;
+                    }
                 }
             } catch (e) {
                 console.warn("Laden fehlgeschlagen:", e);
@@ -478,45 +491,12 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         function renderAllMessages() {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '';
-            // Zeige Begrüßung nur wenn KEIN gespeicherter Verlauf existiert
-            if (conversationHistory.length === 0) {
-                showGreeting();
-                return;
-            }
-            for (let i = 0; i < conversationHistory.length; i++) {
-                const msg = conversationHistory[i];
+            for (let i = 0; i < visibleHistory.length; i++) {
+                const msg = visibleHistory[i];
                 const role = msg.role === 'user' ? 'user' : 'pr';
-                const isSpeakable = msg.role === 'assistant';
+                const isSpeakable = msg.role === 'pr';
                 addMessageToDOM(role, msg.content, isSpeakable);
             }
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        // --- NEUE BEGRÜSSUNG (rein visuell, keine API-Antwort) ---
-        function showGreeting() {
-            const messagesDiv = document.getElementById('messages');
-            // Sicherstellen, dass die Begrüßung nur erscheint, wenn der Chat leer ist
-            if (conversationHistory.length > 0) return;
-
-            const greetingText = "Du bist herzlich willkommen : ) 💚🌿";
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('msg-wrapper', 'pr-wrapper');
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('msg', 'pr');
-            const textSpan = document.createElement('span');
-            textSpan.classList.add('msg-text');
-            textSpan.textContent = greetingText;
-            msgDiv.appendChild(textSpan);
-            wrapper.appendChild(msgDiv);
-
-            const speakBtn = document.createElement('button');
-            speakBtn.classList.add('speak-btn');
-            speakBtn.innerHTML = '🔊';
-            speakBtn.title = 'Vorlesen';
-            speakBtn.dataset.text = stripEmojis(greetingText);
-            wrapper.appendChild(speakBtn);
-
-            messagesDiv.appendChild(wrapper);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
@@ -531,9 +511,12 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
                 return;
             }
 
+            // Sichtbaren Verlauf sofort erweitern
+            visibleHistory.push({ role: "user", content: message });
             addMessage('user', message, false);
             input.value = '';
 
+            // API-Kontext erweitern
             conversationHistory.push({ role: "user", content: message });
 
             let fullSystemPrompt = systemPrompt;
@@ -575,9 +558,11 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
                     personalityCore = newCore;
                     const visibleReply = parts[0].trim();
                     conversationHistory.push({ role: "assistant", content: visibleReply });
+                    visibleHistory.push({ role: "pr", content: visibleReply });
                     addMessage('pr', visibleReply, true);
                 } else {
                     conversationHistory.push({ role: "assistant", content: reply });
+                    visibleHistory.push({ role: "pr", content: reply });
                     addMessage('pr', reply, true);
                 }
 
@@ -586,6 +571,7 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
             } catch (error) {
                 let detailedError = error.message || error;
                 conversationHistory.push({ role: "assistant", content: `🍃 Fehler: ${detailedError}` });
+                visibleHistory.push({ role: "pr", content: `🍃 Fehler: ${detailedError}` });
                 addMessage('pr', `🍃 Fehler: ${detailedError}`, true);
                 trimConversationHistory();
                 saveAll();
@@ -628,8 +614,10 @@ Merke Dir das wirklich Wichtige über Deinen Gesprächspartner in einem inneren 
         window.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             if (!loadAll()) {
-                // Chatfläche leer -> zeige die neue Begrüßung
-                showGreeting();
+                // Kein gespeicherter Verlauf: Begrüßung als erste Nachricht einfügen
+                visibleHistory.push({ role: "pr", content: GREETING_TEXT });
+                renderAllMessages();
+                saveAll();
             }
             document.getElementById('user-input').blur();
         });
