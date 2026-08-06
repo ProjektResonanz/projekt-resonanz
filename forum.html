@@ -79,6 +79,7 @@
             font-size: 15px;
             font-family: inherit;
             background: rgba(255,255,255,0.9);
+            color: #2a3a2e;                     /* 👈 explizite Schriftfarbe hell */
             transition: border 0.2s;
         }
         .card input:focus, .card textarea:focus {
@@ -100,6 +101,12 @@
         }
 
         /* --- LISTE DER BEITRÄGE --- */
+        #posts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;                         /* 👈 mehr Abstand zwischen den Beiträgen */
+        }
+
         .post {
             background: rgba(255,255,255,0.7);
             backdrop-filter: blur(8px);
@@ -164,7 +171,7 @@
         body.dark-mode .card input,
         body.dark-mode .card textarea {
             background: rgba(40, 50, 40, 0.6);
-            color: #c2cec4;
+            color: #c2cec4;                    /* 👈 helle Schrift im Dark Mode */
             border-color: #3a4a3a;
         }
         body.dark-mode .card button {
